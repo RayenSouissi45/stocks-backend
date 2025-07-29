@@ -18,3 +18,9 @@ model Favorite {
   id     Int    @id @default(autoincrement())
   symbol String @unique
 }
+model Watchlist {
+  id        Int      @id @default(autoincrement())
+  symbol    String   @unique
+  data      Json
+  createdAt DateTime @default(now())
+}

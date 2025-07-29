@@ -7,4 +7,4 @@ import { YahooService } from './yahoo.service';
   providers: [YahooService],
   exports: [YahooService], // 👈 this makes it accessible to other modules
 })
-export class StocksModule {}
+export class YahooModule {}
