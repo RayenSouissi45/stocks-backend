@@ -255,6 +255,51 @@ export class YahooService {
       return null;
     }
   }
+  async getMultipleStocks(symbols: string[]) {
+    try {
+      // Define the return type structure
+      type StockResult = {
+        success: boolean;
+        symbol: string;
+        data?: ReturnType<typeof this.getStockBySymbol> extends Promise<infer T>
+          ? T
+          : never;
+        error?: string;
+      };
+
+      // Process all symbols in parallel
+      const stockPromises = symbols.map(
+        async (symbol): Promise<StockResult> => {
+          try {
+            const stock = await this.getStockBySymbol(symbol);
+            if (stock === null) {
+              return { success: false, symbol, error: 'Symbol not found' };
+            }
+            return { success: true, symbol, data: stock };
+          } catch (error) {
+            console.error(`Error processing ${symbol}:`, error);
+            return {
+              success: false,
+              symbol,
+              error:
+                error instanceof Error ? error.message : 'Failed to fetch data',
+            };
+          }
+        },
+      );
+
+      const results = await Promise.all(stockPromises);
+
+      // Separate successful results from errors
+      return {
+        success: results.filter((r) => r.success).map((r) => r.data!),
+        errors: results.filter((r) => !r.success),
+      };
+    } catch (error) {
+      console.error('Error in getMultipleStocks:', error);
+      throw error;
+    }
+  }
 
   private getDateYearsAgo(years: number): Date {
     const date = new Date();
